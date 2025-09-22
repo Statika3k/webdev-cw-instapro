@@ -5,10 +5,10 @@ import { posts, goToPage, user } from "../index.js";
  * @TODO: чтобы отформатировать дату создания поста в виде "19 минут назад"
  * можно использовать https://date-fns.org/v2.29.3/docs/formatDistanceToNow
  */
-export function renderUserPostsPageComponent({ appEl, userId }) {
-  const userPosts = posts.filter((post) => post.user.id === userId);
-
-  if (userPosts.length === 0) {
+export function renderUserPostsPageComponent({ appEl }) {
+    console.log("Рендерим страницу постов пользователя. Количество постов:", posts.length);
+    
+  if (posts.length === 0) {
     appEl.innerHTML = `
       <div class="page-container">
         <div class="header-container"></div>
@@ -18,8 +18,8 @@ export function renderUserPostsPageComponent({ appEl, userId }) {
       </div>
     `;
   } else {
-    // Генерируем HTML для каждого поста пользователя
-    const postsHtml = userPosts
+    // Генерируем HTML для постов
+    const postsHtml = posts
       .map(
         (post) =>
           `
@@ -43,8 +43,8 @@ export function renderUserPostsPageComponent({ appEl, userId }) {
               <span class="user-name">${post.user.name}</span>
               ${post.description}
             </p>
-            <p class="post-date">
-              ${post.addLater}
+            <p class="post-date">            
+              ${post.addLater}  // Добавить позже
             </p>
           </li>
         `

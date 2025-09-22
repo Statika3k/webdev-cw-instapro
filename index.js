@@ -10,6 +10,7 @@ import {
 } from "./routes.js";
 import { renderPostsPageComponent } from "./components/posts-page-component.js";
 import { renderLoadingPageComponent } from "./components/loading-page-component.js";
+import { renderUserPostsPageComponent } from "./components/user-posts-page-component.js";
 import {
   getUserFromLocalStorage,
   removeUserFromLocalStorage,
@@ -67,11 +68,29 @@ export const goToPage = (newPage, data) => {
     }
 
     if (newPage === USER_POSTS_PAGE) {
-      // @@TODO: реализовать получение постов юзера из API
-      console.log("Открываю страницу пользователя: ", data.userId);
-      page = USER_POSTS_PAGE;
-      posts = [];
-      return renderApp();
+      if (!data || !data.userId) {
+        console.error(
+          "Не передан ID пользователя для страницы USER_POSTS_PAGE"
+        );
+        return goToPage(POSTS_PAGE);
+      }
+
+      page = LOADING_PAGE;
+      renderApp();
+
+      return getPosts({ token: getToken() })
+        .then((allPosts) => {
+          page = USER_POSTS_PAGE;
+          posts = allPosts.filter(post => post.user.id === data.userId);  // Фильтруем посты по userId
+          renderApp();
+        })
+        .catch((error) => {
+          console.error(
+            "Ошибка при загрузке постов для страницы пользователя:",
+            error
+          );
+          goToPage(POSTS_PAGE);
+        });
     }
 
     page = newPage;
@@ -121,13 +140,13 @@ const renderApp = () => {
           .then((newPost) => {
             console.log("Пост добавлен", newPost);
             posts.unshift(newPost); // Добавляем новый пост в начало массива
-            goToPage(POSTS_PAGE);  // Переходим на страницу постов
+            goToPage(POSTS_PAGE); // Переходим на страницу постов
           })
           .catch((error) => {
             console.error("Ошибка при добавлении поста:", error);
             alert("Не удалось добавить пост: " + error.message);
             goToPage(ADD_POSTS_PAGE);
-          });        
+          });
       },
     });
   }
@@ -140,8 +159,12 @@ const renderApp = () => {
 
   if (page === USER_POSTS_PAGE) {
     // @TODO: реализовать страницу с фотографиями отдельного пользвателя
-    appEl.innerHTML = "Здесь будет страница фотографий пользователя";
-    return;
+    // appEl.innerHTML = "Здесь будет страница фотографий пользователя";
+    // return;
+    return renderUserPostsPageComponent({
+      appEl,
+      userId: data?.userId, // Передаем ID пользователя в компонент
+    });
   }
 };
 
