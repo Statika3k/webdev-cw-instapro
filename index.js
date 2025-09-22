@@ -120,8 +120,8 @@ const renderApp = () => {
         })
           .then((newPost) => {
             console.log("Пост добавлен", newPost);
-            posts.unshift(newPost);
-            goToPage(POSTS_PAGE);
+            posts.unshift(newPost); // Добавляем новый пост в начало массива
+            goToPage(POSTS_PAGE);  // Переходим на страницу постов
           })
           .catch((error) => {
             console.error("Ошибка при добавлении поста:", error);

@@ -39,7 +39,18 @@ export function renderAddPostPageComponent({ appEl, onAddPostClick }) {
       const description = document
         .getElementById("description-input")
         .value.trim();
-      const errorEl = document.querySelector(".form-error");
+
+      // Проверка на пустое описание
+      if (!description) {
+        alert("Пожалуйста, добавьте описание к посту.");
+        return;
+      }
+
+      // Проверка на отсутствие изображения
+      if (!imageUrl) {
+        alert("Пожалуйста, загрузите изображение.");
+        return;
+      }
 
       onAddPostClick({ description, imageUrl });
     });
