@@ -20,6 +20,7 @@ import {
 export let user = getUserFromLocalStorage();
 export let page = null;
 export let posts = [];
+export let currentPageData = null; // 1) Обявляем глобальную переменную
 
 export const getToken = () => {
   const token = user ? `Bearer ${user.token}` : undefined;
@@ -76,6 +77,7 @@ export const goToPage = (newPage, data) => {
       }
 
       page = LOADING_PAGE;
+      currentPageData = data; // 2) СОХРАНЯЕМ data в глобальную переменную
       renderApp();
 
       return getPosts({ token: getToken() })
@@ -163,7 +165,8 @@ const renderApp = () => {
     // return;
     return renderUserPostsPageComponent({
       appEl,
-      userId: data?.userId, // Передаем ID пользователя в компонент
+      userId: currentPageData?.userId, // 3) Берем userId из глобальной переменной
+      posts: posts,
     });
   }
 };

@@ -1,17 +1,16 @@
+import { USER_POSTS_PAGE } from "../routes.js";
 import { renderHeaderComponent } from "./header-component.js";
-import { posts, goToPage, user, getToken } from "../index.js";
+import { goToPage, user, getToken } from "../index.js";
 import { deletePost } from "../api.js";
 import { formatDistanceToNow } from "https://cdn.jsdelivr.net/npm/date-fns@2.29.3/esm/index.js";
 import ru from "https://cdn.jsdelivr.net/npm/date-fns@2.29.3/esm/locale/ru/index.js";
 
-export function renderUserPostsPageComponent({ appEl }) {
+export function renderUserPostsPageComponent({ appEl, posts, userId }) {
+  console.log("Рендерим страницу пользователя ID:", userId);
   console.log(
     "Рендерим страницу постов пользователя. Количество постов:",
     posts.length
   );
-
-  // Проверяем, является ли текущий пользователь автором поста
-  const isAuthor = user && String(user._id) === String(post.user.id);
 
   if (posts.length === 0) {
     appEl.innerHTML = `
@@ -29,6 +28,9 @@ export function renderUserPostsPageComponent({ appEl }) {
         let postTime = formatDistanceToNow(new Date(post.createdAt), {
           locale: ru,
         });
+
+        // Проверяем, является ли текущий пользователь автором поста
+        const isAuthor = user && String(user._id) === String(post.user.id);
 
         return `
     <li class="post" data-post-id="${post.id}">
