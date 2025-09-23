@@ -1,13 +1,17 @@
 import { renderHeaderComponent } from "./header-component.js";
-import { posts, goToPage, user } from "../index.js";
+import { posts, goToPage, user, getToken } from "../index.js";
+import { deletePost } from "../api.js";
 import { formatDistanceToNow } from "https://cdn.jsdelivr.net/npm/date-fns@2.29.3/esm/index.js";
-import ru from 'https://cdn.jsdelivr.net/npm/date-fns@2.29.3/esm/locale/ru/index.js';
+import ru from "https://cdn.jsdelivr.net/npm/date-fns@2.29.3/esm/locale/ru/index.js";
 
 export function renderUserPostsPageComponent({ appEl }) {
   console.log(
     "Рендерим страницу постов пользователя. Количество постов:",
     posts.length
   );
+
+  // Проверяем, является ли текущий пользователь автором поста
+  const isAuthor = user && String(user._id) === String(post.user.id);
 
   if (posts.length === 0) {
     appEl.innerHTML = `
@@ -50,6 +54,13 @@ export function renderUserPostsPageComponent({ appEl }) {
             <p class="post-date">            
               ${postTime}
             </p>
+            ${
+              isAuthor
+                ? `<div class="post-actions">
+                    <button data-post-id="${post.id}" class="delete-button button">Удалить</button>
+                  </div>`
+                : ""
+            }
           </li>
         `;
       })
@@ -75,4 +86,44 @@ export function renderUserPostsPageComponent({ appEl }) {
       });
     });
   }
+
+  // Обработчики для кнопок удаления
+  const deleteButtons = document.querySelectorAll(".delete-button");
+
+  deleteButtons.forEach((button) => {
+    button.addEventListener("click", () => {
+      const postId = button.dataset.postId;
+
+      if (!user) {
+        alert("Пожалуйста, войдите, чтобы удалять посты.");
+        return;
+      }
+
+      const isConfirmed = confirm("Вы уверены, что хотите удалить этот пост?");
+      if (!isConfirmed) {
+        return;
+      }
+
+      button.disabled = true;
+      button.textContent = "Удаляю...";
+
+      deletePost({ token: getToken(), postId })
+        .then(() => {
+          const postIndex = posts.findIndex((p) => p.id === postId);
+          if (postIndex !== -1) {
+            posts.splice(postIndex, 1);
+          }
+          // Перерисовываем текущую страницу (страницу пользователя)
+          renderUserPostsPageComponent({ appEl });
+        })
+        .catch((error) => {
+          console.error("Ошибка при удалении поста:", error);
+          alert("Не удалось удалить пост: " + error.message);
+        })
+        .finally(() => {
+          button.disabled = false;
+          button.textContent = "Удалить";
+        });
+    });
+  });
 }

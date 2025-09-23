@@ -67,7 +67,7 @@ export function uploadImage({ file }) {
     return response.json();
   });
 }
-export function addPost({ token, description, imageUrl}) {
+export function addPost({ token, description, imageUrl }) {
   return fetch(postsHost, {
     method: "POST",
     headers: {
@@ -82,12 +82,39 @@ export function addPost({ token, description, imageUrl}) {
       throw new Error("Нет авторизации");
     }
     return response.json();
-  })
+  });
 }
 
-export function likePost({ token, postId}) {
-  if(!token) {
-    return Promise.reject(new Error("Пожалуйста, авторизуйтесь, чтобы поставить лайк"))
+export function deletePost({ token, postId }) {
+  if (!token) {
+    return Promise.reject(
+      new Error("Требуется авторизация для удаления поста")
+    );
+  }
+  return fetch(`${postsHost}/${postId}`, {
+    method: "DELETE",
+    headers: {
+      Authorization: token,
+    },
+  }).then((response) => {
+    if (response.status === 401) {
+      throw new Error("Нет авторизации");
+    }
+    if (response.status === 403) {
+      throw new Error("Нельзя удалить чужой пост");
+    }
+    if (!response.ok) {
+      throw new Error("Не удалось удалить пост");
+    }
+    return response.json();
+  });
+}
+
+export function likePost({ token, postId }) {
+  if (!token) {
+    return Promise.reject(
+      new Error("Пожалуйста, авторизуйтесь, чтобы поставить лайк")
+    );
   }
 
   return fetch(`${postsHost}/${postId}/like`, {
@@ -96,23 +123,23 @@ export function likePost({ token, postId}) {
       Authorization: token,
     },
   })
-  .then((response) => {
-    if (response.status === 401) {
-      throw new Error("Нет авторизации");
-    }
-    if (!response.ok) {
-      throw new Error("Не удалось поставить лайк");
-    }
-    return response.json();
-  })
-  .then((data) => {
-    return data.post;
-  });
+    .then((response) => {
+      if (response.status === 401) {
+        throw new Error("Нет авторизации");
+      }
+      if (!response.ok) {
+        throw new Error("Не удалось поставить лайк");
+      }
+      return response.json();
+    })
+    .then((data) => {
+      return data.post;
+    });
 }
 
-export function dislikePost({ token, postId}) {
-  if(!token) {
-    return Promise.reject(new Error("Требуется авторизация для снятия лайка"))
+export function dislikePost({ token, postId }) {
+  if (!token) {
+    return Promise.reject(new Error("Требуется авторизация для снятия лайка"));
   }
 
   return fetch(`${postsHost}/${postId}/dislike`, {
@@ -121,16 +148,16 @@ export function dislikePost({ token, postId}) {
       Authorization: token,
     },
   })
-  .then((response) => {
-    if (response.status === 401) {
-      throw new Error("Нет авторизации");
-    }
-    if (!response.ok) {
-      throw new Error("Не удалось убрать лайк");
-    }
-    return response.json();
-  })
-  .then((data) => {
-    return data.post;
-  });
+    .then((response) => {
+      if (response.status === 401) {
+        throw new Error("Нет авторизации");
+      }
+      if (!response.ok) {
+        throw new Error("Не удалось убрать лайк");
+      }
+      return response.json();
+    })
+    .then((data) => {
+      return data.post;
+    });
 }

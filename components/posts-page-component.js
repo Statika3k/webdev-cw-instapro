@@ -1,9 +1,9 @@
 import { AUTH_PAGE, USER_POSTS_PAGE } from "../routes.js";
 import { renderHeaderComponent } from "./header-component.js";
-import { posts, goToPage, getToken } from "../index.js";
+import { posts, goToPage, getToken, user } from "../index.js";
 import { likePost, dislikePost } from "../api.js";
 import { formatDistanceToNow } from "https://cdn.jsdelivr.net/npm/date-fns@2.29.3/esm/index.js";
-import ru from 'https://cdn.jsdelivr.net/npm/date-fns@2.29.3/esm/locale/ru/index.js';
+import ru from "https://cdn.jsdelivr.net/npm/date-fns@2.29.3/esm/locale/ru/index.js";
 
 export function renderPostsPageComponent({ appEl }) {
   console.log("Актуальный список постов:", posts);
@@ -13,6 +13,9 @@ export function renderPostsPageComponent({ appEl }) {
       let postTime = formatDistanceToNow(new Date(post.createdAt), {
         locale: ru,
       });
+
+      // Проверяем, является ли текущий пользователь автором поста
+      const isAuthor = user && String(user._id) === String(post.user.id);
 
       return `
     <li class="post" data-post-id="${post.id}">
@@ -40,6 +43,13 @@ export function renderPostsPageComponent({ appEl }) {
             <p class="post-date">
               ${postTime}
             </p>
+            ${
+              isAuthor
+                ? `<div class="post-actions">
+                    <button data-post-id="${post.id}" class="delete-button button">Удалить</button>
+                  </div>`
+                : ""
+            }
           </li>
         `;
     })
@@ -124,4 +134,48 @@ export function renderPostsPageComponent({ appEl }) {
         });
     });
   });
+
+  // Обработчики для кнопок удаления
+  const deleteButtons = document.querySelectorAll(".delete-button");
+  deleteButtons.forEach((button) => {
+  button.addEventListener("click", () => {
+    const postId = button.dataset.postId;
+
+    if (!user) {
+      alert("Пожалуйста, войдите, чтобы удалять посты.");
+      return;
+    }
+
+    // Спрашиваем подтверждение у пользователя
+    const isConfirmed = confirm("Вы уверены, что хотите удалить этот пост?");
+    if (!isConfirmed) {
+      return;
+    }
+
+    // Показываем индикатор загрузки
+    button.disabled = true;
+    button.textContent = "Удаляю...";
+
+    deletePost({ token: getToken(), postId })
+      .then(() => {
+        // Удаляем пост из глобального массива
+        const postIndex = posts.findIndex((p) => p.id === postId);
+        if (postIndex !== -1) {
+          posts.splice(postIndex, 1);
+        }
+
+        // Перерисовываем страницу, чтобы обновить интерфейс
+        renderPostsPageComponent({ appEl });
+      })
+      .catch((error) => {
+        console.error("Ошибка при удалении поста:", error);
+        alert("Не удалось удалить пост: " + error.message);
+      })
+      .finally(() => {
+        // Восстанавливаем состояние кнопки (на случай, если перерисовка не произошла мгновенно)
+        button.disabled = false;
+        button.textContent = "Удалить";
+      });
+  });
+});
 }

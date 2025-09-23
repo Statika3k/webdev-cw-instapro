@@ -117,6 +117,8 @@ export function renderAuthPageComponent({ appEl, setUser }) {
 
         loginUser({ login, password })
           .then((user) => {
+            console.log("Ответ от сервера при логине:", user);   // Удалить проверку!!!            
+            console.log("user.user:", user.user);   // Удалить проверку!!!
             setUser(user.user);
           })
           .catch((error) => {
@@ -151,6 +153,8 @@ export function renderAuthPageComponent({ appEl, setUser }) {
 
         registerUser({ login, password, name, imageUrl })
           .then((user) => {
+            console.log("Ответ от сервера при регистрации:", user);   // Удалить проверку!!!
+            console.log("user.user:", user.user);   // Удалить проверку!!!
             setUser(user.user);
           })
           .catch((error) => {

@@ -43,7 +43,11 @@
   flex-direction: column;
   list-style: none;
   padding: 0;
-  margin: 0;
+  margin: 0;  
+}
+
+.post {
+  position: relative;
 }
 
 .post-header {
