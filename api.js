@@ -84,3 +84,53 @@ export function addPost({ token, description, imageUrl}) {
     return response.json();
   })
 }
+
+export function likePost({ token, postId}) {
+  if(!token) {
+    return Promise.reject(new Error("Пожалуйста, авторизуйтесь, чтобы поставить лайк"))
+  }
+
+  return fetch(`${postsHost}/${postId}/like`, {
+    method: "POST",
+    headers: {
+      Authorization: token,
+    },
+  })
+  .then((response) => {
+    if (response.status === 401) {
+      throw new Error("Нет авторизации");
+    }
+    if (!response.ok) {
+      throw new Error("Не удалось поставить лайк");
+    }
+    return response.json();
+  })
+  .then((data) => {
+    return data.post;
+  });
+}
+
+export function dislikePost({ token, postId}) {
+  if(!token) {
+    return Promise.reject(new Error("Требуется авторизация для снятия лайка"))
+  }
+
+  return fetch(`${postsHost}/${postId}/dislike`, {
+    method: "POST",
+    headers: {
+      Authorization: token,
+    },
+  })
+  .then((response) => {
+    if (response.status === 401) {
+      throw new Error("Нет авторизации");
+    }
+    if (!response.ok) {
+      throw new Error("Не удалось убрать лайк");
+    }
+    return response.json();
+  })
+  .then((data) => {
+    return data.post;
+  });
+}

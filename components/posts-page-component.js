@@ -1,6 +1,7 @@
-import { USER_POSTS_PAGE } from "../routes.js";
+import { AUTH_PAGE, USER_POSTS_PAGE } from "../routes.js";
 import { renderHeaderComponent } from "./header-component.js";
-import { posts, goToPage } from "../index.js";
+import { posts, goToPage, getToken } from "../index.js";
+import { likePost, dislikePost } from "../api.js";
 
 export function renderPostsPageComponent({ appEl }) {
   console.log("Актуальный список постов:", posts);
@@ -23,7 +24,9 @@ export function renderPostsPageComponent({ appEl }) {
             </div>
             <div class="post-likes">
               <button data-post-id="${post.id}" class="like-button">
-                <img src="./assets/images/like-not-active.svg">
+                <img src="./assets/images/${
+                  post.isLiked ? "like-active" : "like-not-active"
+                }.svg">
               </button>
               <p class="post-likes-text">
                 Нравится: <strong>${post.likes.length}</strong>
@@ -62,4 +65,62 @@ export function renderPostsPageComponent({ appEl }) {
       });
     });
   }
+
+  // Обработчик кликов по кнопкам лайков
+  const likeButtons = document.querySelectorAll(".like-button");
+
+  likeButtons.forEach((button) => {
+    button.addEventListener("click", (e) => {
+      e.stopPropagation();
+
+      const postId = button.dataset.postId;
+
+      const token = getToken();
+      if (!token) {
+        alert("Пожалуйста, войдите, чтобы ставить лайки");
+        goToPage(AUTH_PAGE);
+        return;
+      }
+
+      const likeImage = button.querySelector("img");
+      const isCurrentlyLiked = likeImage.src.includes("like-active.svg");
+
+      button.disabled = true; // Блокируем кнопку на время запроса
+      likeImage.style.opacity = "0.5"; // Визуальная индикация загрузки
+
+      // Выбираем, какой запрос отправить, и выполняем его
+      const likePromise = isCurrentlyLiked
+        ? dislikePost({ token, postId })
+        : likePost({ token, postId });
+
+      likePromise
+        .then((updatedPost) => {
+          // Обновляем пост в глобальном массиве
+          const postIndex = posts.findIndex((p) => p.id === updatedPost.id);
+          if (postIndex !== -1) {
+            posts[postIndex] = updatedPost;
+          }
+
+          // Обновляем иконку лайка
+          likeImage.src = `./assets/images/like-${
+            updatedPost.isLiked ? "active" : "not-active"
+          }.svg`;
+
+          // Обновляем счётчик лайков
+          const likesText = button.nextElementSibling;
+          if (likesText?.classList.contains("post-likes-text")) {
+            likesText.innerHTML = `Нравится: <strong>${updatedPost.likes.length}</strong>`;
+          }
+        })
+        .catch((error) => {
+          console.error("Ошибка при обработке лайка:", error);
+          alert("Не удалось обновить лайк: " + error.message);
+        })
+        .finally(() => {
+          // Снимаем индикатор загрузки
+          button.disabled = false;
+          likeImage.style.opacity = "1";
+        });
+    });
+  });
 }
