@@ -51,18 +51,6 @@
 
 ## 🎯 Особенности реализации
 
-### Безопасность
-```javascript
-export function sanitizeHtml(value) {
-  return value
-    .replaceAll('&', '&amp;')
-    .replaceAll('<', '&lt;')
-    .replaceAll('>', '&gt;')
-    .replaceAll('"', '&quot;')
-    .replaceAll("'", '&#039;')
-    .replaceAll('/', '&#x2F;');
-};
-
 📁 Структура проекта
 instapro/
 ├── index.html          # Основной HTML файл
@@ -79,3 +67,16 @@ instapro/
 │   └── upload-image-component.js
 ├── styles.css        # Основные стили
 └── ui-kit.css        # Стили UI компонентов
+
+### Безопасность
+```javascript
+export function sanitizeHtml(value) {
+  return value
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#039;')
+    .replaceAll('/', '&#x2F;');
+};
+
