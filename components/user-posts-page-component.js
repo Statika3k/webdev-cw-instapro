@@ -2,6 +2,7 @@ import { USER_POSTS_PAGE } from "../routes.js";
 import { renderHeaderComponent } from "./header-component.js";
 import { goToPage, user, getToken } from "../index.js";
 import { deletePost } from "../api.js";
+import { sanitizeHtml } from "../helpers.js";
 import { formatDistanceToNow } from "https://cdn.jsdelivr.net/npm/date-fns@2.29.3/esm/index.js";
 import ru from "https://cdn.jsdelivr.net/npm/date-fns@2.29.3/esm/locale/ru/index.js";
 
@@ -51,7 +52,7 @@ export function renderUserPostsPageComponent({ appEl, posts, userId }) {
             </div>
             <p class="post-text">
               <span class="user-name">${post.user.name}</span>
-              ${post.description}
+              ${sanitizeHtml(post.description)}
             </p>
             <p class="post-date">            
               ${postTime}
