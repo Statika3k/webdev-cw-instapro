@@ -54,20 +54,25 @@
 ## 📁 Структура проекта
 
 instapro/
-├── index.html          # Основной HTML файл
-├── index.js           # Точка входа приложения
-├── api.js            # Модуль для работы с API
-├── routes.js         # Константы маршрутов
-├── helpers.js        # Вспомогательные функции
-├── components/       # Компоненты приложения
+├── index.html
+├── index.js
+├── api.js
+├── routes.js
+├── helpers.js
+├── components/
 │   ├── add-post-page-component.js
 │   ├── auth-page-component.js
 │   ├── header-component.js
 │   ├── posts-page-component.js
 │   ├── user-posts-page-component.js
+│   ├── loading-page-component.js
 │   └── upload-image-component.js
-├── styles.css        # Основные стили
-└── ui-kit.css        # Стили UI компонентов
+├── assets/
+│   └── images/
+│       ├── like-active.svg
+│       └── like-not-active.svg
+├── styles.css
+└── ui-kit.css
 
 ### Безопасность
 ```javascript
