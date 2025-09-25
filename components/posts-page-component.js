@@ -14,8 +14,7 @@ export function renderPostsPageComponent({ appEl }) {
       let postTime = formatDistanceToNow(new Date(post.createdAt), {
         locale: ru,
       });
-
-      // Проверяем, является ли текущий пользователь автором поста
+      
       const isAuthor = user && String(user._id) === String(post.user.id);
 
       return `
@@ -77,8 +76,7 @@ export function renderPostsPageComponent({ appEl }) {
       });
     });
   }
-
-  // Обработчик кликов по кнопкам лайков
+  
   const likeButtons = document.querySelectorAll(".like-button");
 
   likeButtons.forEach((button) => {
@@ -97,28 +95,24 @@ export function renderPostsPageComponent({ appEl }) {
       const likeImage = button.querySelector("img");
       const isCurrentlyLiked = likeImage.src.includes("like-active.svg");
 
-      button.disabled = true; // Блокируем кнопку на время запроса
-      likeImage.style.opacity = "0.5"; // Визуальная индикация загрузки
-
-      // Выбираем, какой запрос отправить, и выполняем его
+      button.disabled = true; 
+      likeImage.style.opacity = "0.5"; 
+      
       const likePromise = isCurrentlyLiked
         ? dislikePost({ token, postId })
         : likePost({ token, postId });
 
       likePromise
-        .then((updatedPost) => {
-          // Обновляем пост в глобальном массиве
+        .then((updatedPost) => {          
           const postIndex = posts.findIndex((p) => p.id === updatedPost.id);
           if (postIndex !== -1) {
             posts[postIndex] = updatedPost;
           }
 
-          // Обновляем иконку лайка
           likeImage.src = `./assets/images/like-${
             updatedPost.isLiked ? "active" : "not-active"
           }.svg`;
-
-          // Обновляем счётчик лайков
+          
           const likesText = button.nextElementSibling;
           if (likesText?.classList.contains("post-likes-text")) {
             likesText.innerHTML = `Нравится: <strong>${updatedPost.likes.length}</strong>`;
@@ -128,15 +122,13 @@ export function renderPostsPageComponent({ appEl }) {
           console.error("Ошибка при обработке лайка:", error);
           alert("Не удалось обновить лайк: " + error.message);
         })
-        .finally(() => {
-          // Снимаем индикатор загрузки
+        .finally(() => {          
           button.disabled = false;
           likeImage.style.opacity = "1";
         });
     });
   });
-
-  // Обработчики для кнопок удаления
+  
   const deleteButtons = document.querySelectorAll(".delete-button");
   deleteButtons.forEach((button) => {
   button.addEventListener("click", () => {
@@ -146,34 +138,28 @@ export function renderPostsPageComponent({ appEl }) {
       alert("Пожалуйста, войдите, чтобы удалять посты.");
       return;
     }
-
-    // Спрашиваем подтверждение у пользователя
+    
     const isConfirmed = confirm("Вы уверены, что хотите удалить этот пост?");
     if (!isConfirmed) {
       return;
     }
-
-    // Показываем индикатор загрузки
+    
     button.disabled = true;
     button.textContent = "Удаляю...";
 
     deletePost({ token: getToken(), postId })
-      .then(() => {
-        // Удаляем пост из глобального массива
+      .then(() => {        
         const postIndex = posts.findIndex((p) => p.id === postId);
         if (postIndex !== -1) {
           posts.splice(postIndex, 1);
-        }
-
-        // Перерисовываем страницу, чтобы обновить интерфейс
+        }        
         renderPostsPageComponent({ appEl });
       })
       .catch((error) => {
         console.error("Ошибка при удалении поста:", error);
         alert("Не удалось удалить пост: " + error.message);
       })
-      .finally(() => {
-        // Восстанавливаем состояние кнопки (на случай, если перерисовка не произошла мгновенно)
+      .finally(() => {        
         button.disabled = false;
         button.textContent = "Удалить";
       });

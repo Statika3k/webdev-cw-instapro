@@ -20,13 +20,11 @@ export function renderAddPostPageComponent({ appEl, onAddPostClick }) {
     `;
 
     appEl.innerHTML = appHtml;
-
-    // Рендерим заголовок
+    
     renderHeaderComponent({
       element: document.querySelector(".header-container"),
     });
-
-    // Рендерим компонент загрузки изображения
+    
     const uploadImageContainer = appEl.querySelector(".upload-image-container");
     renderUploadImageComponent({
       element: uploadImageContainer,
@@ -39,14 +37,12 @@ export function renderAddPostPageComponent({ appEl, onAddPostClick }) {
       const description = document
         .getElementById("description-input")
         .value.trim();
-
-      // Проверка на пустое описание
+      
       if (!description) {
         alert("Пожалуйста, добавьте описание к посту.");
         return;
       }
-
-      // Проверка на отсутствие изображения
+      
       if (!imageUrl) {
         alert("Пожалуйста, загрузите изображение.");
         return;
