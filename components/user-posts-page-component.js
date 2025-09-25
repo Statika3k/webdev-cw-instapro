@@ -1,7 +1,7 @@
 import { USER_POSTS_PAGE } from "../routes.js";
 import { renderHeaderComponent } from "./header-component.js";
 import { goToPage, user, getToken } from "../index.js";
-import { deletePost } from "../api.js";
+import { deletePost, likePost, dislikePost } from "../api.js";
 import { sanitizeHtml } from "../helpers.js";
 import { formatDistanceToNow } from "https://cdn.jsdelivr.net/npm/date-fns@2.29.3/esm/index.js";
 import ru from "https://cdn.jsdelivr.net/npm/date-fns@2.29.3/esm/locale/ru/index.js";
@@ -23,14 +23,12 @@ export function renderUserPostsPageComponent({ appEl, posts, userId }) {
       </div>
     `;
   } else {
-    // Генерируем HTML для постов
     const postsHtml = posts
       .map((post) => {
         let postTime = formatDistanceToNow(new Date(post.createdAt), {
           locale: ru,
         });
 
-        // Проверяем, является ли текущий пользователь автором поста
         const isAuthor = user && String(user._id) === String(post.user.id);
 
         return `
@@ -44,7 +42,9 @@ export function renderUserPostsPageComponent({ appEl, posts, userId }) {
             </div>
             <div class="post-likes">
               <button data-post-id="${post.id}" class="like-button">
-                <img src="./assets/images/like-not-active.svg">
+                <img src="./assets/images/${
+                  post.isLiked ? "like-active" : "like-not-active"
+                }.svg">
               </button>
               <p class="post-likes-text">
                 Нравится: <strong>${post.likes.length}</strong>
@@ -90,7 +90,58 @@ export function renderUserPostsPageComponent({ appEl, posts, userId }) {
     });
   }
 
-  // Обработчики для кнопок удаления
+  const likeButtons = document.querySelectorAll(".like-button");
+
+  likeButtons.forEach((button) => {
+    button.addEventListener("click", (e) => {
+      e.stopPropagation();
+
+      const postId = button.dataset.postId;
+
+      const token = getToken();
+      if (!token) {
+        alert("Пожалуйста, войдите, чтобы ставить лайки");
+        goToPage(AUTH_PAGE);
+        return;
+      }
+
+      const likeImage = button.querySelector("img");
+      const isCurrentlyLiked = likeImage.src.includes("like-active.svg");
+
+      button.disabled = true;
+      likeImage.style.opacity = "0.5";
+
+      const likePromise = isCurrentlyLiked
+        ? dislikePost({ token, postId })
+        : likePost({ token, postId });
+
+      likePromise
+        .then((updatedPost) => {
+          const postIndex = posts.findIndex((p) => p.id === updatedPost.id);
+          if (postIndex !== -1) {
+            posts[postIndex] = updatedPost;
+          }
+
+          likeImage.src = `./assets/images/like-${
+            updatedPost.isLiked ? "active" : "not-active"
+          }.svg`;
+
+          const likesText = button.nextElementSibling;
+          if (likesText?.classList.contains("post-likes-text")) {
+            likesText.innerHTML = `Нравится: <strong>${updatedPost.likes.length}</strong>`;
+          }
+        })
+        .catch((error) => {
+          console.error("Ошибка при обработке лайка:", error);
+          alert("Не удалось обновить лайк: " + error.message);
+        })
+        .finally(() => {
+          button.disabled = false;
+          likeImage.style.opacity = "1";
+        });
+    });
+  });
+
   const deleteButtons = document.querySelectorAll(".delete-button");
 
   deleteButtons.forEach((button) => {
@@ -116,7 +167,6 @@ export function renderUserPostsPageComponent({ appEl, posts, userId }) {
           if (postIndex !== -1) {
             posts.splice(postIndex, 1);
           }
-          // Перерисовываем текущую страницу (страницу пользователя)
           renderUserPostsPageComponent({ appEl });
         })
         .catch((error) => {
