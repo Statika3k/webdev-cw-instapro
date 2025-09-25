@@ -51,22 +51,45 @@
 
 ## 🎯 Особенности реализации
 
-📁 Структура проекта
-instapro/
-├── index.html          # Основной HTML файл
-├── index.js           # Точка входа приложения
-├── api.js            # Модуль для работы с API
-├── routes.js         # Константы маршрутов
-├── helpers.js        # Вспомогательные функции
-├── components/       # Компоненты приложения
-│   ├── add-post-page-component.js
-│   ├── auth-page-component.js
-│   ├── header-component.js
-│   ├── posts-page-component.js
-│   ├── user-posts-page-component.js
-│   └── upload-image-component.js
-├── styles.css        # Основные стили
-└── ui-kit.css        # Стили UI компонентов
+## 📁 Структура проекта
+
+**Корневая директория:**
+
+index.html - Основной HTML файл
+
+index.js - Точка входа приложения
+
+api.js - Модуль для работы с API
+
+routes.js - Константы маршрутов
+
+helpers.js - Вспомогательные функции
+
+styles.css - Основные стили приложения
+
+ui-kit.css - Стили UI компонентов
+
+**Директория components/:**
+
+add-post-page-component.js - Страница добавления поста
+
+auth-page-component.js - Страница авторизации/регистрации
+
+header-component.js - Компонент шапки сайта
+
+posts-page-component.js - Страница ленты постов
+
+user-posts-page-component.js - Страница постов пользователя
+
+loading-page-component.js - Компонент загрузки
+
+upload-image-component.js - Компонент загрузки изображений
+
+**Директория assets/images/:**
+
+like-active.svg - Иконка активного лайка
+
+like-not-active.svg - Иконка неактивного лайка
 
 ### Безопасность
 ```javascript
