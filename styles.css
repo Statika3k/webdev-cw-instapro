@@ -1,5 +1,17 @@
 .page-container {
   padding: 0 20px;
+  animation: fadeIn 0.3s ease-in-out;
+  /* Для плавного перехода */
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
 }
 
 .page-header {
@@ -44,6 +56,10 @@
   list-style: none;
   padding: 0;
   margin: 0;
+}
+
+.post {
+  position: relative;
 }
 
 .post-header {
@@ -91,6 +107,15 @@
   padding-left: 0px;
   padding-bottom: 5px;
   cursor: pointer;
+  transition: transform 0.2s ease; /* Плавное изменение трансформации */
+}
+
+.like-button:hover {
+  transform: scale(1.1); /* Увеличиваем кнопку на 10% при наведении */
+}
+
+.like-button:active {
+  transform: scale(0.95); /* Небольшое уменьшение при клике для эффекта "нажатия" */
 }
 
 .user-name {
@@ -107,7 +132,7 @@
   color: #8a8a8a;
 }
 
-.post + .post {
+.post+.post {
   margin-top: 20px;
 }
 

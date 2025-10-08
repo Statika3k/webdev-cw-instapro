@@ -1,6 +1,6 @@
 // Замени на свой, чтобы получить независимый от других набор данных.
 // "боевая" версия инстапро лежит в ключе prod
-const personalKey = "prod";
+const personalKey = "n-shakhanova";
 const baseHost = "https://webdev-hw-api.vercel.app";
 const postsHost = `${baseHost}/api/v1/${personalKey}/instapro`;
 
@@ -66,4 +66,98 @@ export function uploadImage({ file }) {
   }).then((response) => {
     return response.json();
   });
+}
+export function addPost({ token, description, imageUrl }) {
+  return fetch(postsHost, {
+    method: "POST",
+    headers: {
+      Authorization: token,
+    },
+    body: JSON.stringify({
+      description,
+      imageUrl,
+    }),
+  }).then((response) => {
+    if (response.status === 400) {
+      throw new Error("Нет авторизации");
+    }
+    return response.json();
+  });
+}
+
+export function deletePost({ token, postId }) {
+  if (!token) {
+    return Promise.reject(
+      new Error("Требуется авторизация для удаления поста")
+    );
+  }
+  return fetch(`${postsHost}/${postId}`, {
+    method: "DELETE",
+    headers: {
+      Authorization: token,
+    },
+  }).then((response) => {
+    if (response.status === 401) {
+      throw new Error("Нет авторизации");
+    }
+    if (response.status === 403) {
+      throw new Error("Нельзя удалить чужой пост");
+    }
+    if (!response.ok) {
+      throw new Error("Не удалось удалить пост");
+    }
+    return response.json();
+  });
+}
+
+export function likePost({ token, postId }) {
+  if (!token) {
+    return Promise.reject(
+      new Error("Пожалуйста, авторизуйтесь, чтобы поставить лайк")
+    );
+  }
+
+  return fetch(`${postsHost}/${postId}/like`, {
+    method: "POST",
+    headers: {
+      Authorization: token,
+    },
+  })
+    .then((response) => {
+      if (response.status === 401) {
+        throw new Error("Нет авторизации");
+      }
+      if (!response.ok) {
+        throw new Error("Не удалось поставить лайк");
+      }
+      return response.json();
+    })
+    .then((data) => {
+      return data.post;
+    });
+}
+
+export function dislikePost({ token, postId }) {
+  if (!token) {
+    return Promise.reject(new Error("Требуется авторизация для снятия лайка"));
+  }
+
+  return fetch(`${postsHost}/${postId}/dislike`, {
+    method: "POST",
+    headers: {
+      Authorization: token,
+    },
+  })
+    .then((response) => {
+      if (response.status === 401) {
+        throw new Error("Нет авторизации");
+      }
+      if (!response.ok) {
+        throw new Error("Не удалось убрать лайк");
+      }
+      return response.json();
+    })
+    .then((data) => {
+      return data.post;
+    });
 }
